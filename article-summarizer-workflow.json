@@ -1,0 +1,580 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        176,
+        208
+      ],
+      "id": "079248bd-bf8e-4084-9393-09c952e56451",
+      "name": "Telegram Trigger"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.textChunk }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2864,
+        208
+      ],
+      "id": "9e30a0e2-da32-4126-bbcf-1cdb18519a86",
+      "name": "Send a text message"
+    },
+    {
+      "parameters": {
+        "documentId": "YOUR_GOOGLE_SHEET_ID_HERE",
+        "sheetName": "Sheet1",
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "UserID",
+              "lookupValue": "={{ $json.message.chat.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        400,
+        208
+      ],
+      "id": "62620181-0171-4a2a-bd6d-03a24439d673",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cb4bf3c8-0514-496c-87ff-c9e84be1440b",
+              "leftValue": "={{ $json.UserID }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        208
+      ],
+      "id": "8968260c-51d0-41df-95a8-d956cef9a366",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ee50097c-a0e3-4a30-8ee1-dbfc93c204e8",
+              "leftValue": "={{ $json.MessageCount }}",
+              "rightValue": 2,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1072,
+        208
+      ],
+      "id": "9f2b82cf-ff7c-41a2-9037-38f8270431fe",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "You sent more than 3 Messages today, Come back tomorrow!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1296,
+        112
+      ],
+      "id": "34216a9b-dd9f-4b62-ba9a-950366b4ad7c",
+      "name": "Send a text message1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a057ede9-7b4c-4622-91bd-9291f5b55542",
+              "leftValue": "={{ $json.Date }}",
+              "rightValue": "={{ $today }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        848,
+        304
+      ],
+      "id": "84819913-f183-4667-8586-30ab7ff6f709",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": "YOUR_GOOGLE_SHEET_ID_HERE",
+        "sheetName": "Sheet1",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "UserID": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+            "MessageCount": "1",
+            "Date": "={{ $today }}"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1296,
+        -80
+      ],
+      "id": "85050f10-8890-4b1b-96c4-98c35c6aa333",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": "YOUR_GOOGLE_SHEET_ID_HERE",
+        "sheetName": "Sheet1",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "UserID": "={{ $json.UserID }}",
+            "MessageCount": "1",
+            "Date": "={{ $today }}"
+          },
+          "matchingColumns": [
+            "UserID"
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1296,
+        496
+      ],
+      "id": "f0ad2395-fa94-4637-959e-6cf0a72947c9",
+      "name": "Append or update row in sheet"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": "YOUR_GOOGLE_SHEET_ID_HERE",
+        "sheetName": "Sheet1",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "UserID": "={{ $json.UserID }}",
+            "Date": "={{ $today }}",
+            "MessageCount": "={{ $json.MessageCount +1}}"
+          },
+          "matchingColumns": [
+            "UserID"
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1296,
+        304
+      ],
+      "id": "62c1368d-4bda-455b-8b68-b8d47ddd1086",
+      "name": "Append or update row in sheet1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fireworks.ai/inference/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"accounts/sentientfoundation-serverless/models/dobby-mini-unhinged-plus-llama-3-1-8b\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are Dobby, an AI assistant from the Sentient Foundation. Your task is to act as an expert summarizer. You will be given the text content from a webpage; provide a concise and clear summary of its key points.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($json.extractedText) }}\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2416,
+        208
+      ],
+      "id": "4cb8cdbb-8cdc-40b2-b7d6-c1b1a9b94d84",
+      "name": "HTTP Request1",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const messageText = $('Telegram Trigger').first().json.message.text;\n// Basic URL extraction (you might want a more robust regex)\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/g;\nconst urls = messageText.match(urlRegex);\n\nif (urls && urls.length > 0) {\n  // Assuming the first URL is the one we want\n  return { url: urls[0] };\n} else {\n  // Handle cases where no URL is found - you might want to send an error message back\n  // For now, let's assume a URL is always present or handled later\n  // throw new Error(\"No URL found in the message.\"); // This would stop the workflow\n  return { error: \"No URL found in the message.\" } // Or pass an error object\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        304
+      ],
+      "id": "5ab05ad0-25e4-4045-a1e9-6c1478f9d616",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "user-agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1968,
+        208
+      ],
+      "id": "ea9bccbd-dd4c-4be0-a42c-4d2f8e8afd55",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Access the first input item directly\nconst inputItem = $input.first();\n\n// --- Input Validation ---\nif (!inputItem || !inputItem.json) {\n  console.error(\"Function Node: No valid input item or missing '.json' property.\");\n  return [{ json: { error: \"No valid input item or item missing '.json' property.\", extractedText: null } }];\n}\n\nconst html = inputItem.json.data;\n\nif (typeof html !== 'string') {\n  console.error(\"Function Node: HTML content is not a string. Type:\", typeof html);\n  return [{ json: { error: \"HTML content is not a string.\", extractedText: null } }];\n}\n\nlet text = html;\n\nlet previousText;\ndo {\n  previousText = text;\n  text = text.replace(/\\\\r\\\\n/g, '\\n'); \n  text = text.replace(/\\\\n/g, '\\n');  \n  text = text.replace(/\\\\r/g, '\\n');   \n  text = text.replace(/\\\\t/g, ' '); \n} while (text !== previousText); \n\ntext = text.replace(/<\\/(p|div|h[1-6]|li|th|td|article|section|header|footer|aside|nav|blockquote|pre|hr|ul|ol|dl|table|form|fieldset|address)>/gi, '\\n');\ntext = text.replace(/<(p|div|h[1-6]|li|th|td|article|section|header|footer|aside|nav|blockquote|pre|hr|ul|ol|dl|table|form|fieldset|address)[^>]*>/gi, '\\n');\ntext = text.replace(/<br\\s*\\/?>/gi, '\\n');\n\ntext = text.replace(/<script\\b[^<]*(?:(?!<\\/script>)<[^<]*)*<\\/script>/gi, \"\");\ntext = text.replace(/<style\\b[^<]*(?:(?!<\\/style>)<[^<]*)*<\\/style>/gi, \"\");\n\ntext = text.replace(/<[^>]+>/g, ' ');\n\ntry {\n  const he = require('he');\n  text = he.decode(text);\n} catch (e) {\n  text = text.replace(/ /g, ' ');\n  text = text.replace(/&/g, '&');\n  text = text.replace(/</g, '<');\n  text = text.replace(/>/g, '>');\n  text = text.replace(/\"/g, '\"');\n  text = text.replace(/'/g, \"'\");\n  text = text.replace(/'/g, \"'\");\n  text = text.replace(/–/g, \"–\"); \n  text = text.replace(/—/g, \"—\");\n  text = text.replace(/‘/g, \"‘\");\n  text = text.replace(/’/g, \"’\");\n  text = text.replace(/“/g, \"“\");\n  text = text.replace(/”/g, \"”\");\n}\n\ntext = text.replace(/\\t+/g, ' ');\ntext = text.replace(/ {2,}/g, ' ');\n\nlet lines = text.split('\\n');\nlines = lines.map(line => line.trim());\nlines = lines.filter(line => line.length > 0);\n\ntext = lines.join('\\n\\n');\ntext = text.trim();\n\nreturn [{\n  json: {\n    extractedText: text\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2192,
+        208
+      ],
+      "id": "bdadd968-3441-477c-b510-277f8ebb7b69",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const MAX_TELEGRAM_MESSAGE_LENGTH = 4000; \nconst TELEGRAM_TRIGGER_NODE_NAME = 'Telegram Trigger'; \n\nfunction escapeMarkdownV2(text) {\n  if (typeof text !== 'string') {\n    return '';\n  }\n  const escapeChars = /[_*[\\]`]/g;\n  return text.replace(escapeChars, '\\\\$&'); \n}\n\nconst longText = $input.first().json.choices[0].message.content;\n\nlet chatId;\ntry {\n  chatId = $(TELEGRAM_TRIGGER_NODE_NAME).item.json.message.chat.id;\n} catch (error) {\n  console.error(`Split Text Node: Could not retrieve chatId from trigger node named \"${TELEGRAM_TRIGGER_NODE_NAME}\". Error: ${error.message}`);\n  return []; \n}\n\nif (typeof longText === 'undefined' || longText === null) {\n  if (chatId) {\n    return [{ json: { textChunk: escapeMarkdownV2(\"Error: Could not retrieve content to send.\"), chatId: chatId } }];\n  }\n  return []; \n}\n\nconst textToSplit = String(longText);\n\nconst messagesToSend = [];\nlet currentPosition = 0;\n\nif (textToSplit.length === 0) {\n  if (chatId) {\n     return [{ json: { textChunk: escapeMarkdownV2(\"(The AI returned an empty response.)\"), chatId: chatId } }];\n  }\n  return [];\n}\n\n\nwhile (currentPosition < textToSplit.length) {\n  let chunkEnd = currentPosition + MAX_TELEGRAM_MESSAGE_LENGTH;\n  let chunk = textToSplit.substring(currentPosition, chunkEnd);\n  let actualChunkLength = chunk.length; \n\n  if (chunkEnd < textToSplit.length) {\n    let lastNewline = chunk.lastIndexOf('\\n');\n    let lastSpace = chunk.lastIndexOf(' '); \n\n    if (lastNewline > Math.min(50, chunk.length / 2) ) { \n      actualChunkLength = lastNewline + 1; \n    } else if (lastSpace > Math.min(50, chunk.length / 2)) { \n      actualChunkLength = lastSpace + 1; \n    }\n  }\n  \n  chunk = textToSplit.substring(currentPosition, currentPosition + actualChunkLength);\n\n  const escapedChunk = escapeMarkdownV2(chunk.trim());\n\n  messagesToSend.push({\n    json: {\n      textChunk: escapedChunk, \n      chatId: chatId\n    }\n  });\n  currentPosition += actualChunkLength;\n}\n\nif (messagesToSend.length === 0 && textToSplit.length > 0) {\n    messagesToSend.push({json: {textChunk: escapeMarkdownV2(textToSplit.trim()), chatId: chatId}});\n}\n\nreturn messagesToSend;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        208
+      ],
+      "id": "52d7408a-7be1-45ef-93ba-9bd55ecfe3c3",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "eb94f1fd-c478-4482-a438-ee4ba3ffe970",
+              "leftValue": "={{ $json.url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1744,
+        304
+      ],
+      "id": "b9159355-617e-4d73-9778-377813952bd4",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('If').item.json.UserID }}",
+        "text": "No link!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1968,
+        400
+      ],
+      "id": "11ee9b81-c394-42d5-8b37-3999258d8e85",
+      "name": "Send a text message2"
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
